@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق أَثَر | محمد خير أبو بلال</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #064e3b; 
+            --accent: #c5a059;  
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #102a43;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(6, 78, 59, 0.15);
+        }
+
+        body.dark-mode {
+            --primary: #c5a059;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-dark: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            margin: 0;
+            color: var(--text-dark);
+            text-align: center;
+            transition: all 0.4s ease;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+        }
+
+        .app-header {
+            background: var(--primary);
+            color: var(--accent);
+            padding: 50px 20px 80px;
+            box-shadow: var(--shadow);
+            position: relative;
+            border-bottom: 4px solid var(--accent);
+            border-radius: 0 0 50% 50% / 0 0 25% 25%;
+        }
+
+        .header-main-row { display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; position: relative; z-index: 2; }
+        .header-title { font-family: 'Amiri', serif; font-size: 38px; margin: 0; }
+
+        .pts-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 18px; border-radius: 50px;
+            border: 1px solid var(--accent);
+            display: flex; align-items: center; gap: 8px; font-weight: 900;
+        }
+
+        .app-content { padding: 20px; margin-top: -50px; position: relative; z-index: 3; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .card.active { display: block; animation: slideUp 0.5s ease; }
+
+        @keyframes slideUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+
+        .btn {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid #e2e8f0;
+            padding: 16px;
+            margin: 10px 0;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-p { background: linear-gradient(135deg, var(--primary) 0%, #0d9488 100%); color: var(--accent); border: none; }
+
+        .timer-container { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+        #timer-bar { height: 100%; background: var(--accent); width: 100%; transition: 0.1s linear; }
+
+        .correct { border-color: #27ae60 !important; background: #eafff2 !important; color: #27ae60; }
+        .wrong { border-color: #c0392b !important; background: #fff0f0 !important; color: #c0392b; }
+
+        /* الطور الجماعي */
+        .group-status { display: flex; justify-content: space-around; margin-bottom: 15px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 12px; }
+        .active-player { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="header-main-row">
+            <h1 class="header-title">أَثَر</h1>
+            <div class="pts-badge"><i class="fas fa-coins"></i> <span id="pts-val">0</span></div>
+        </div>
+        <p id="rank-tag" style="margin-top: 10px; font-weight: bold;">اللقب: طالب علم</p>
+    </div>
+
+    <div class="app-content">
+        <div id="scr-home" class="card active">
+            <div style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"><i class="fas fa-mosque"></i></div>
+            <h2>تطبيق أَثَر</h2>
+            <button class="btn btn-p" onclick="showCard('scr-modes')">ابدأ اللعب</button>
+            <button class="btn" onclick="showCard('scr-shop')">المتجر الملكي</button>
+        </div>
+
+        <div id="scr-modes" class="card">
+            <h3>اختر طور اللعب</h3>
+            <button class="btn" onclick="setMode('solo')">الطور التقليدي</button>
+            <button class="btn" onclick="setMode('speed')">سباق الزمن ⚡</button>
+            <button class="btn" onclick="setMode('survival')">طور البقاء 🛡️</button>
+            <button class="btn" onclick="setMode('group')">تحدي لاعبين 👥</button>
+            <button onclick="showCard('scr-home')" style="background:none; border:none; color:#777; cursor:pointer;">🔙 رجوع</button>
+        </div>
+
+        <div id="scr-levels" class="card">
+            <h3>اختر القسم</h3>
+            <button class="btn" onclick="startGame('aqida')">⭐ العقيدة والتوحيد</button>
+            <button class="btn" onclick="startGame('sira')">🌱 السيرة النبوية</button>
+            <button class="btn" onclick="startGame('quran')">📖 علوم القرآن</button>
+            <button class="btn" onclick="startGame('sahaba')">⚔️ سير الصحابة</button>
+            <button onclick="showCard('scr-modes')" style="background:none; border:none; color:#777; cursor:pointer;">🔙 رجوع</button>
+        </div>
+
+        <div id="scr-game" class="card">
+            <div id="group-header" style="display:none;">
+                <div class="group-status">
+                    <span id="p1-label">لاعب 1: <span id="p1-score">0</span></span>
+                    <span id="p2-label">لاعب 2: <span id="p2-score">0</span></span>
+                </div>
+            </div>
+            <div id="game-info" style="font-size: 12px; color: var(--accent); margin-bottom: 5px;"></div>
+            <div class="timer-container" id="t-cont"><div id="timer-bar"></div></div>
+            <h3 id="q-txt">...</h3>
+            <div id="opt-container"></div>
+        </div>
+
+        <div id="scr-shop" class="card">
+            <h3>🛒 المتجر</h3>
+            <button class="btn" onclick="buy('dark', 300)">تفعيل الوضع الليلي (300)</button>
+            <button onclick="showCard('scr-home')" style="background:none; border:none; color:#777; cursor:pointer;">🔙 رجوع</button>
+        </div>
+    </div>
+
+    <script>
+        const DB = {
+            aqida: [
+                {q:"ما هو الركن الأول من أركان الإيمان؟", a:"الإيمان بالله", w:["الإيمان بالرسل","الإيمان بالكتب","الإيمان بالقدر"]},
+                {q:"كم عدد أركان الإيمان؟", a:"6", w:["5","7","4"]},
+                {q:"ما معنى توحيد الربوبية؟", a:"إفراد الله بالخلق والرزق", w:["إفراد الله بالعبادة","إثبات الأسماء"]},
+                {q:"من هو الملك الموكل بالوحي؟", a:"جبريل عليه السلام", w:["ميكائيل","إسرافيل","مالك"]},
+                {q:"ما هو الذنب الذي لا يغفره الله إلا بالتوبة قبل الموت؟", a:"الشرك بالله", w:["السرقة","الكذب","الغيبة"]},
+                {q:"أين الله؟", a:"في السماء على العرش استوى", w:["في كل مكان بذاته","لا يوصف بمكان"]},
+                {q:"ما أول ما يسأل عنه العبد يوم القيامة؟", a:"الصلاة", w:["الزكاة","الصيام","بر الوالدين"]},
+                {q:"ما هو الركن الخامس من أركان الإسلام؟", a:"حج البيت", w:["الصلاة","الزكاة","الصيام"]},
+                {q:"كم عدد أركان الإسلام؟", a:"5", w:["6","4","7"]},
+                {q:"ما معنى 'لا إله إلا الله'؟", a:"لا معبود بحق إلا الله", w:["لا خالق إلا الله","الله موجود"]}
+            ],
+            sira: [
+                {q:"أين ولد النبي ﷺ؟", a:"مكة المكرمة", w:["المدينة","الطائف","اليمن"]},
+                {q:"ما اسم أم النبي ﷺ؟", a:"آمنة بنت وهب", w:["حليمة السعدية","خديجة","فاطمة"]},
+                {q:"كم كان عمر النبي ﷺ حين نزل عليه الوحي؟", a:"40 سنة", w:["25 سنة","30 سنة","50 سنة"]},
+                {q:"ما هي أول زوجات النبي ﷺ؟", a:"خديجة بنت خويلد", w:["عائشة","حفصة","سودة"]},
+                {q:"إلى أين كانت الهجرة الأولى؟", a:"الحبشة", w:["المدينة","مصر","الشام"]},
+                {q:"ما اسم ناقة النبي ﷺ؟", a:"القصواء", w:["العضباء","الغمامة","الكحلاء"]},
+                {q:"في أي شهر ولد النبي ﷺ؟", a:"ربيع الأول", w:["رمضان","رجب","شوال"]},
+                {q:"كم عدد غزوات النبي ﷺ؟", a:"27 غزوة", w:["15","10","30"]},
+                {q:"ما هي آخر غزوة للنبي ﷺ؟", a:"تبوك", w:["الخندق","خيبر","فتح مكة"]},
+                {q:"من هي مرضعة النبي ﷺ؟", a:"حليمة السعدية", w:["ثويبة","فاطمة","آمنة"]}
+            ],
+            quran: [
+                {q:"ما هي أطول سورة في القرآن؟", a:"البقرة", w:["النساء","آل عمران","الأعراف"]},
+                {q:"سورة بدأت بدون بسم الله؟", a:"التوبة", w:["الأنفال","النحل","هود"]},
+                {q:"ما هي السورة التي تسمى 'عروس القرآن'؟", a:"الرحمن", w:["يس","الواقعة","الملك"]},
+                {q:"كم عدد سور القرآن الكريم؟", a:"114", w:["110","120","115"]},
+                {q:"ما هي أقصر سورة في القرآن؟", a:"الكوثر", w:["الإخلاص","الناس","الفلق"]},
+                {q:"سورة تسمى 'قلب القرآن'؟", a:"يس", w:["الكهف","الملك","الرحمن"]},
+                {q:"في أي سورة وردت آية الكرسي؟", a:"البقرة", w:["آل عمران","النساء","المائدة"]},
+                {q:"كم عدد أجزاء القرآن؟", a:"30", w:["60","20","40"]},
+                {q:"ما هي السورة التي تجير من عذاب القبر؟", a:"الملك", w:["الواقعة","يس","الكهف"]},
+                {q:"كم سجدة تلاوة في القرآن؟", a:"15", w:["10","14","12"]}
+            ],
+            sahaba: [
+                {q:"من هو أول من أسلم من الرجال؟", a:"أبو بكر الصديق", w:["عمر بن الخطاب","علي بن أبي طالب","عثمان"]},
+                {q:"من هو الملقب بـ 'الفاروق'؟", a:"عمر بن الخطاب", w:["خالد بن الوليد","أبو عبيدة","حمزة"]},
+                {q:"من هو 'سيف الله المسلول'؟", a:"خالد بن الوليد", w:["سعد بن أبي وقاص","الزبير","علي"]},
+                {q:"من هو أول مؤذن في الإسلام؟", a:"بلال بن رباح", w:["زيد بن حارثة","عمار بن ياسر","أبو هريرة"]},
+                {q:"من هو الصحابي الذي تستحي منه الملائكة؟", a:"عثمان بن عفان", w:["أبو بكر","علي","طلحة"]},
+                {q:"من هو 'أمين هذه الأمة'؟", a:"أبو عبيدة بن الجراح", w:["أبو هريرة","معاذ بن جبل","ابن عباس"]},
+                {q:"من هو أصغر قائد في الإسلام؟", a:"أسامة بن زيد", w:["علي بن أبي طالب","محمد بن القاسم","زيد"]},
+                {q:"من هو الملقب بـ 'أسد الله'؟", a:"حمزة بن عبد المطلب", w:["خالد بن الوليد","علي بن أبي طالب","جعفر"]},
+                {q:"من هو ترجمان القرآن؟", a:"عبد الله بن عباس", w:["عبد الله بن مسعود","أبي بن كعب","زيد"]},
+                {q:"من هي الملقبة بـ 'ذات النطاقين'؟", a:"أسماء بنت أبي بكر", w:["عائشة","فاطمة","خديجة"]}
+            ]
+        };
+
+        let pts = parseInt(localStorage.getItem('ath_pts')) || 0;
+        let gameMode = 'solo', pool = [], active = true, timer, turn = 1, scores = {1:0, 2:0};
+
+        function sync() { document.getElementById('pts-val').innerText = pts; localStorage.setItem('ath_pts', pts); }
+        sync();
+
+        function showCard(id) {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function setMode(m) { gameMode = m; showCard('scr-levels'); }
+
+        function startGame(lvl) {
+            pool = [...DB[lvl]].sort(() => Math.random() - 0.5);
+            scores = {1:0, 2:0}; turn = 1;
+            document.getElementById('game-info').innerText = "الطور: " + gameMode;
+            
+            if(gameMode === 'group') {
+                document.getElementById('group-header').style.display = 'block';
+                document.getElementById('t-cont').style.display = 'none';
+                updateGroupUI();
+            } else {
+                document.getElementById('group-header').style.display = 'none';
+                document.getElementById('t-cont').style.display = 'block';
+                if(gameMode === 'speed') startTimer();
+            }
+            
+            showCard('scr-game');
+            next();
+        }
+
+        function updateGroupUI() {
+            document.getElementById('p1-score').innerText = scores[1];
+            document.getElementById('p2-score').innerText = scores[2];
+            document.getElementById('p1-label').className = (turn === 1) ? 'active-player' : '';
+            document.getElementById('p2-label').className = (turn === 2) ? 'active-player' : '';
+        }
+
+        function startTimer() {
+            let t = 30;
+            timer = setInterval(() => {
+                t--;
+                document.getElementById('timer-bar').style.width = (t/30)*100 + "%";
+                if(t<=0) endGame();
+            }, 1000);
+        }
+
+        function next() {
+            if(pool.length === 0) { endGame(); return; }
+            active = true;
+            let qD = pool.pop();
+            let ops = [qD.a, ...qD.w].sort(() => Math.random() - 0.5);
+            document.getElementById('q-txt').innerText = qD.q;
+            const box = document.getElementById('opt-container');
+            box.innerHTML = "";
+            ops.forEach(opt => {
+                const b = document.createElement('button'); b.className = "btn"; b.innerText = opt;
+                b.onclick = () => {
+                    if(!active) return; active = false;
+                    if(opt === qD.a) {
+                        b.classList.add('correct'); 
+                        if(gameMode === 'group') scores[turn] += 10;
+                        pts += 10; sync();
+                        setTimeout(() => { if(gameMode === 'group') { turn = (turn === 1) ? 2 : 1; updateGroupUI(); } next(); }, 700);
+                    } else {
+                        b.classList.add('wrong');
+                        if(gameMode === 'survival') setTimeout(() => { alert("خسرت في طور البقاء!"); endGame(); }, 400);
+                        else setTimeout(() => { if(gameMode === 'group') { turn = (turn === 1) ? 2 : 1; updateGroupUI(); } next(); }, 700);
+                    }
+                };
+                box.appendChild(b);
+            });
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            if(gameMode === 'group') alert(`انتهى التحدي!\nلاعب 1: ${scores[1]}\nلاعب 2: ${scores[2]}`);
+            else alert("انتهت الجولة!");
+            showCard('scr-home');
+        }
+
+        function buy(i, c) { if(pts >= c) { pts -= c; sync(); if(i==='dark') document.body.classList.toggle('dark-mode'); alert('تم!'); } else alert('نقاطك لا تكفي'); }
+
+    </script>
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2026 <strong>محمد خير أبو بلال</strong>. جميع الحقوق محفوظة.</p>
+    </div>
+</footer>
+</body>
+</html>
