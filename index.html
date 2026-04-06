@@ -98,9 +98,29 @@
         .correct { border-color: #27ae60 !important; background: #eafff2 !important; color: #27ae60; }
         .wrong { border-color: #c0392b !important; background: #fff0f0 !important; color: #c0392b; }
 
-        /* الطور الجماعي */
-        .group-status { display: flex; justify-content: space-around; margin-bottom: 15px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 12px; }
-        .active-player { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .home-btn-fixed {
+            background: var(--primary);
+            color: var(--accent);
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid var(--accent);
+            margin: 0 auto 15px;
+            transition: 0.3s;
+        }
+
+        .ad-space {
+            margin-top: 25px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px dashed var(--accent);
+            border-radius: 12px;
+            font-size: 11px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        footer { margin-top: 20px; font-size: 14px; color: var(--text-dark); opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -110,7 +130,7 @@
             <h1 class="header-title">أَثَر</h1>
             <div class="pts-badge"><i class="fas fa-coins"></i> <span id="pts-val">0</span></div>
         </div>
-        <p id="rank-tag" style="margin-top: 10px; font-weight: bold;">اللقب: طالب علم</p>
+        <p id="rank-tag" style="margin-top: 10px; font-weight: bold; color: var(--accent);">اللقب: طالب علم</p>
     </div>
 
     <div class="app-content">
@@ -119,6 +139,7 @@
             <h2>تطبيق أَثَر</h2>
             <button class="btn btn-p" onclick="showCard('scr-modes')">ابدأ اللعب</button>
             <button class="btn" onclick="showCard('scr-shop')">المتجر الملكي</button>
+            <div class="ad-space">إعلان (Google AdSense)</div>
         </div>
 
         <div id="scr-modes" class="card">
@@ -127,94 +148,153 @@
             <button class="btn" onclick="setMode('speed')">سباق الزمن ⚡</button>
             <button class="btn" onclick="setMode('survival')">طور البقاء 🛡️</button>
             <button class="btn" onclick="setMode('group')">تحدي لاعبين 👥</button>
-            <button onclick="showCard('scr-home')" style="background:none; border:none; color:#777; cursor:pointer;">🔙 رجوع</button>
+            <button onclick="showCard('scr-home')" style="background:none; border:none; color:#777; cursor:pointer; margin-top:10px;">🔙 رجوع</button>
         </div>
 
         <div id="scr-levels" class="card">
             <h3>اختر القسم</h3>
+            <button class="btn" onclick="startGame('prophets')">✨ قصص الأنبياء</button>
             <button class="btn" onclick="startGame('aqida')">⭐ العقيدة والتوحيد</button>
             <button class="btn" onclick="startGame('sira')">🌱 السيرة النبوية</button>
             <button class="btn" onclick="startGame('quran')">📖 علوم القرآن</button>
             <button class="btn" onclick="startGame('sahaba')">⚔️ سير الصحابة</button>
-            <button onclick="showCard('scr-modes')" style="background:none; border:none; color:#777; cursor:pointer;">🔙 رجوع</button>
+            <button onclick="showCard('scr-modes')" style="background:none; border:none; color:#777; cursor:pointer; margin-top:10px;">🔙 رجوع</button>
         </div>
 
         <div id="scr-game" class="card">
-            <div id="group-header" style="display:none;">
-                <div class="group-status">
-                    <span id="p1-label">لاعب 1: <span id="p1-score">0</span></span>
-                    <span id="p2-label">لاعب 2: <span id="p2-score">0</span></span>
-                </div>
+            <div class="home-btn-fixed" onclick="endGame()">
+                <i class="fas fa-home"></i>
             </div>
             <div id="game-info" style="font-size: 12px; color: var(--accent); margin-bottom: 5px;"></div>
             <div class="timer-container" id="t-cont"><div id="timer-bar"></div></div>
             <h3 id="q-txt">...</h3>
             <div id="opt-container"></div>
+            <button id="hint-btn" class="btn" style="margin-top:20px; font-size:14px; display:none;" onclick="useHint()">💡 حذف إجابة (خمس نقاط)</button>
+            <div class="ad-space">إعلان (Google AdSense)</div>
         </div>
 
         <div id="scr-shop" class="card">
-            <h3>🛒 المتجر</h3>
-            <button class="btn" onclick="buy('dark', 300)">تفعيل الوضع الليلي (300)</button>
-            <button onclick="showCard('scr-home')" style="background:none; border:none; color:#777; cursor:pointer;">🔙 رجوع</button>
+            <h3>🛒 المتجر الملكي</h3>
+            <p>نقاطك: <span id="shop-pts">0</span></p>
+            <button class="btn" onclick="buy('dark', 300)">تفعيل الوضع الليلي (300 🪙)</button>
+            <button class="btn" onclick="buy('hint', 100)">شراء 5 تلميحات (100 🪙)</button>
+            <button onclick="showCard('scr-home')" style="background:none; border:none; color:#777; cursor:pointer; margin-top:10px;">🔙 رجوع</button>
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2026 <strong>محمد خير أبو بلال</strong>. جميع الحقوق محفوظة.</p>
+    </footer>
+
     <script>
+        // مصفوفة البيانات الضخمة (تأكد من نسخها من الردود السابقة لتظل موجودة)
         const DB = {
+            prophets: [
+                {q:"من هو النبي الذي ابتلعه الحوت؟", a:"يونس عليه السلام", w:["يوسف","موسى","نوح"]},
+                {q:"من هو النبي الملقب بـ 'خليل الله'؟", a:"إبراهيم عليه السلام", w:["موسى","عيسى","نوح"]},
+                {q:"ما هي معجزة النبي موسى عليه السلام الكبرى؟", a:"العصا وانفلاق البحر", w:["إحياء الموتى","ناقة الله","تحدثه في المهد"]},
+                {q:"أي نبي سخر الله له الجن والريح؟", a:"سليمان عليه السلام", w:["داوود","زكريا","أيوب"]},
+                {q:"من هو أول الأنبياء (أبو البشر)؟", a:"آدم عليه السلام", w:["نوح","إدريس","شيث"]},
+                {q:"من النبي الذي بنى السفينة؟", a:"نوح عليه السلام", w:["هود","صالح","لوط"]},
+                {q:"من هو النبي الذي صبر على المرض طويلاً؟", a:"أيوب عليه السلام", w:["يونس","إلياس","يسع"]},
+                {q:"من النبي الذي رفعه الله إلى السماء؟", a:"عيسى عليه السلام", w:["يحيى","زكريا","هود"]},
+                {q:"من هو النبي الذي آلان الله له الحديد؟", a:"داوود عليه السلام", w:["سليمان","صالح","شعيب"]},
+                {q:"ما اسم النبي الذي أرسل إلى قوم عاد؟", a:"هود عليه السلام", w:["صالح","لوط","إبراهيم"]},
+                {q:"من النبي الذي أرسل إلى قوم ثمود؟", a:"صالح عليه السلام", w:["هود","شعيب","إسماعيل"]},
+                {q:"من هو النبي 'ذبيح الله'؟", a:"إسماعيل عليه السلام", w:["إسحاق","يوسف","يحيى"]},
+                {q:"من هو النبي الذي رأى 11 كوكباً والشمس والقمر يسجدون له؟", a:"يوسف عليه السلام", w:["يعقوب","إسحاق","داوود"]},
+                {q:"من النبي الذي قتل جالوت؟", a:"داوود عليه السلام", w:["طالوت","سليمان","موسى"]},
+                {q:"من هو النبي الملقب بـ 'كليم الله'؟", a:"موسى عليه السلام", w:["عيسى","إبراهيم","محمد ﷺ"]}
+            ],
             aqida: [
                 {q:"ما هو الركن الأول من أركان الإيمان؟", a:"الإيمان بالله", w:["الإيمان بالرسل","الإيمان بالكتب","الإيمان بالقدر"]},
                 {q:"كم عدد أركان الإيمان؟", a:"6", w:["5","7","4"]},
-                {q:"ما معنى توحيد الربوبية؟", a:"إفراد الله بالخلق والرزق", w:["إفراد الله بالعبادة","إثبات الأسماء"]},
                 {q:"من هو الملك الموكل بالوحي؟", a:"جبريل عليه السلام", w:["ميكائيل","إسرافيل","مالك"]},
-                {q:"ما هو الذنب الذي لا يغفره الله إلا بالتوبة قبل الموت؟", a:"الشرك بالله", w:["السرقة","الكذب","الغيبة"]},
-                {q:"أين الله؟", a:"في السماء على العرش استوى", w:["في كل مكان بذاته","لا يوصف بمكان"]},
                 {q:"ما أول ما يسأل عنه العبد يوم القيامة؟", a:"الصلاة", w:["الزكاة","الصيام","بر الوالدين"]},
-                {q:"ما هو الركن الخامس من أركان الإسلام؟", a:"حج البيت", w:["الصلاة","الزكاة","الصيام"]},
-                {q:"كم عدد أركان الإسلام؟", a:"5", w:["6","4","7"]},
-                {q:"ما معنى 'لا إله إلا الله'؟", a:"لا معبود بحق إلا الله", w:["لا خالق إلا الله","الله موجود"]}
+                {q:"ما هو توحيد الألوهية؟", a:"إفراد الله بالعبادة", w:["إفراد الله بالخلق","توحيد الأسماء والصفات"]},
+                {q:"ما هو الإحسان؟", a:"أن تعبد الله كأنك تراه", w:["كثرة الصدقة","صلاة الليل","حفظ القرآن"]},
+                {q:"الإيمان باليوم الآخر من أركان الإيمان؟", a:"صح", w:["خطأ"]},
+                {q:"ما معنى الإيمان بالقدر؟", a:"التسليم بقضاء الله خيره وشره", w:["إنكار الأسباب","معرفة الغيب"]},
+                {q:"من هم الملائكة؟", a:"عالم غيبي خلقوا من نور", w:["بشر صالحون","خلقوا من نار","أرواح ميتة"]},
+                {q:"ما حكم الشرك بالله؟", a:"مخرج من الملة", w:["مكروه","معصية صغيرة","جائز"]},
+                {q:"ما هو الركن الثالث من أركان الإسلام؟", a:"إيتاء الزكاة", w:["الصلاة","الصوم","الحج"]},
+                {q:"الإيمان يزيد وينقص؟", a:"نعم، يزيد بالطاعة وينقص بالمعصية", w:["لا، هو ثابت"]},
+                {q:"ما هي العبادة؟", a:"كل ما يحبه الله ويرضاه", w:["الصلاة فقط","الدعاء فقط"]},
+                {q:"أين كتب الله مقادير الخلائق؟", a:"في اللوح المحفوظ", w:["في السماء الدنيا","في العرش"]},
+                {q:"ما هو الكفر الأصغر؟", a:"لا يخرج من الملة", w:["يخرج من الملة","مثل الشرك الأكبر"]}
             ],
             sira: [
-                {q:"أين ولد النبي ﷺ؟", a:"مكة المكرمة", w:["المدينة","الطائف","اليمن"]},
-                {q:"ما اسم أم النبي ﷺ؟", a:"آمنة بنت وهب", w:["حليمة السعدية","خديجة","فاطمة"]},
-                {q:"كم كان عمر النبي ﷺ حين نزل عليه الوحي؟", a:"40 سنة", w:["25 سنة","30 سنة","50 سنة"]},
-                {q:"ما هي أول زوجات النبي ﷺ؟", a:"خديجة بنت خويلد", w:["عائشة","حفصة","سودة"]},
-                {q:"إلى أين كانت الهجرة الأولى؟", a:"الحبشة", w:["المدينة","مصر","الشام"]},
+                {q:"أين ولد النبي ﷺ؟", a:"مكة المكرمة", w:["المدينة","الجمعة","اليمن"]},
+                {q:"ما اسم أم النبي ﷺ؟", a:"آمنة بنت وهب", w:["حليمة","خديجة","فاطمة"]},
+                {q:"كم كان عمر النبي ﷺ حين نزل عليه الوحي؟", a:"40 سنة", w:["25","30","50"]},
+                {q:"من هي أول زوجات النبي ﷺ؟", a:"خديجة بنت خويلد", w:["عائشة","حفصة","سودة"]},
+                {q:"متى كانت غزوة بدر الكبرى؟", a:"2 هجرية", w:["3","5","1"]},
+                {q:"ما اسم والد النبي ﷺ؟", a:"عبد الله", w:["عبد المطلب","أبو طالب","حمزة"]},
+                {q:"في أي عام توفي النبي ﷺ؟", a:"11 هجرية", w:["10","12","13"]},
+                {q:"من هو جد النبي ﷺ الذي كفله؟", a:"عبد المطلب", w:["أبو طالب","العباس","حمزة"]},
+                {q:"ما هي الغزوة التي جرح فيها النبي ﷺ؟", a:"أحد", w:["بدر","الخندق","تبوك"]},
+                {q:"من هو الصحابي الذي رافق النبي في الهجرة؟", a:"أبو بكر الصديق", w:["عمر","علي","عثمان"]},
                 {q:"ما اسم ناقة النبي ﷺ؟", a:"القصواء", w:["العضباء","الغمامة","الكحلاء"]},
-                {q:"في أي شهر ولد النبي ﷺ؟", a:"ربيع الأول", w:["رمضان","رجب","شوال"]},
-                {q:"كم عدد غزوات النبي ﷺ؟", a:"27 غزوة", w:["15","10","30"]},
-                {q:"ما هي آخر غزوة للنبي ﷺ؟", a:"تبوك", w:["الخندق","خيبر","فتح مكة"]},
-                {q:"من هي مرضعة النبي ﷺ؟", a:"حليمة السعدية", w:["ثويبة","فاطمة","آمنة"]}
+                {q:"كم عدد أبناء النبي ﷺ من الذكور؟", a:"3", w:["2","4","1"]},
+                {q:"كم عدد بنات النبي ﷺ؟", a:"4", w:["3","2","5"]},
+                {q:"ما اسم العام الذي ولد فيه النبي ﷺ؟", a:"عام الفيل", w:["عام الحزن","عام الوفود"]},
+                {q:"أين دفن النبي ﷺ؟", a:"في حجرة عائشة بالمدينة", w:["في البقيع","في مكة"]}
             ],
             quran: [
                 {q:"ما هي أطول سورة في القرآن؟", a:"البقرة", w:["النساء","آل عمران","الأعراف"]},
                 {q:"سورة بدأت بدون بسم الله؟", a:"التوبة", w:["الأنفال","النحل","هود"]},
-                {q:"ما هي السورة التي تسمى 'عروس القرآن'؟", a:"الرحمن", w:["يس","الواقعة","الملك"]},
                 {q:"كم عدد سور القرآن الكريم؟", a:"114", w:["110","120","115"]},
-                {q:"ما هي أقصر سورة في القرآن؟", a:"الكوثر", w:["الإخلاص","الناس","الفلق"]},
+                {q:"ما هي أقصر سورة في القرآن؟", a:"الكوثر", w:["الإخلاص","العصر","الفلق"]},
+                {q:"ما هي السورة التي تسمى 'عروس القرآن'؟", a:"الرحمن", w:["يس","الواقعة","الملك"]},
                 {q:"سورة تسمى 'قلب القرآن'؟", a:"يس", w:["الكهف","الملك","الرحمن"]},
                 {q:"في أي سورة وردت آية الكرسي؟", a:"البقرة", w:["آل عمران","النساء","المائدة"]},
-                {q:"كم عدد أجزاء القرآن؟", a:"30", w:["60","20","40"]},
-                {q:"ما هي السورة التي تجير من عذاب القبر؟", a:"الملك", w:["الواقعة","يس","الكهف"]},
-                {q:"كم سجدة تلاوة في القرآن؟", a:"15", w:["10","14","12"]}
+                {q:"كم عدد أجزاء القرآن؟", a:"30", w:["60","15","40"]},
+                {q:"ما هي السورة التي تعدل ثلث القرآن؟", a:"الإخلاص", w:["الفاتحة","يس","الواقعة"]},
+                {q:"ما هي أعظم سورة في القرآن؟", a:"الفاتحة", w:["البقرة","النساء","يس"]},
+                {q:"ما هي السورة التي تشفع لصاحبها في القبر؟", a:"الملك", w:["الكهف","يس","الدخان"]},
+                {q:"كم سجدة تلاوة في القرآن؟", a:"15", w:["10","14","12"]},
+                {q:"ما هي أطول آية في القرآن؟", a:"آية الدين (البقرة)", w:["آية الكرسي","آية المداينة"]},
+                {q:"سورة تسمى 'السبع المثاني'؟", a:"الفاتحة", w:["البقرة","يس","الرحمن"]},
+                {q:"في أي شهر نزل القرآن؟", a:"رمضان", w:["شوال","رجب","شعبان"]}
             ],
             sahaba: [
-                {q:"من هو أول من أسلم من الرجال؟", a:"أبو بكر الصديق", w:["عمر بن الخطاب","علي بن أبي طالب","عثمان"]},
-                {q:"من هو الملقب بـ 'الفاروق'؟", a:"عمر بن الخطاب", w:["خالد بن الوليد","أبو عبيدة","حمزة"]},
-                {q:"من هو 'سيف الله المسلول'؟", a:"خالد بن الوليد", w:["سعد بن أبي وقاص","الزبير","علي"]},
-                {q:"من هو أول مؤذن في الإسلام؟", a:"بلال بن رباح", w:["زيد بن حارثة","عمار بن ياسر","أبو هريرة"]},
-                {q:"من هو الصحابي الذي تستحي منه الملائكة؟", a:"عثمان بن عفان", w:["أبو بكر","علي","طلحة"]},
-                {q:"من هو 'أمين هذه الأمة'؟", a:"أبو عبيدة بن الجراح", w:["أبو هريرة","معاذ بن جبل","ابن عباس"]},
-                {q:"من هو أصغر قائد في الإسلام؟", a:"أسامة بن زيد", w:["علي بن أبي طالب","محمد بن القاسم","زيد"]},
-                {q:"من هو الملقب بـ 'أسد الله'؟", a:"حمزة بن عبد المطلب", w:["خالد بن الوليد","علي بن أبي طالب","جعفر"]},
-                {q:"من هو ترجمان القرآن؟", a:"عبد الله بن عباس", w:["عبد الله بن مسعود","أبي بن كعب","زيد"]},
-                {q:"من هي الملقبة بـ 'ذات النطاقين'؟", a:"أسماء بنت أبي بكر", w:["عائشة","فاطمة","خديجة"]}
+                {q:"من هو أول من أسلم من الرجال؟", a:"أبو بكر الصديق", w:["عمر","علي","عثمان"]},
+                {q:"من هو الملقب بـ 'الفاروق'؟", a:"عمر بن الخطاب", w:["خالد","أبو عبيدة","حمزة"]},
+                {q:"من هو 'سيف الله المسلول'؟", a:"خالد بن الوليد", w:["سعد","الزبير","علي"]},
+                {q:"من هو ذو النورين؟", a:"عثمان بن عفان", w:["أبو بكر","عمر","علي"]},
+                {q:"من هو ابن عم النبي ﷺ وأول من أسلم من الصبيان؟", a:"علي بن أبي طالب", w:["جعفر","عقيل","الفضل"]},
+                {q:"من هو أسد الله؟", a:"حمزة بن عبد المطلب", w:["خالد","عمر"]},
+                {q:"من هو أمين هذه الأمة؟", a:"أبو عبيدة بن الجراح", w:["سعد","أبو هريرة"]},
+                {q:"من هو أكثر الصحابة رواية للحديث؟", a:"أبو هريرة", w:["ابن عمر","ابن عباس","أنس"]},
+                {q:"من هو مؤذن الرسول ﷺ؟", a:"بلال بن رباح", w:["زيد","عبد الله"]},
+                {q:"من هي الملقبة بـ 'ذات النطاقين'؟", a:"أسماء بنت أبي بكر", w:["عائشة","فاطمة","خديجة"]},
+                {q:"من هو ترجمان القرآن؟", a:"عبد الله بن عباس", w:["ابن مسعود","زيد"]},
+                {q:"من هو غسيل الملائكة؟", a:"حنظلة بن أبي عامر", w:["مصعب","حمزة"]},
+                {q:"من هو الصحابي الذي اهتز لموته عرش الرحمن؟", a:"سعد بن معاذ", w:["سعد بن عبادة","زيد"]},
+                {q:"من هو خادم الرسول ﷺ؟", a:"أنس بن مالك", w:["زيد","بلال"]},
+                {q:"من هو الملقب بـ 'ذي الجناحين'؟", a:"جعفر بن أبي طالب", w:["علي","حمزة"]}
             ]
         };
 
         let pts = parseInt(localStorage.getItem('ath_pts')) || 0;
-        let gameMode = 'solo', pool = [], active = true, timer, turn = 1, scores = {1:0, 2:0};
+        let hints = parseInt(localStorage.getItem('ath_hints')) || 0;
+        let gameMode = 'solo', pool = [], active = true, timer, currentAnswer="";
 
-        function sync() { document.getElementById('pts-val').innerText = pts; localStorage.setItem('ath_pts', pts); }
+        function sync() { 
+            document.getElementById('pts-val').innerText = pts; 
+            document.getElementById('shop-pts').innerText = pts;
+            localStorage.setItem('ath_pts', pts);
+            localStorage.setItem('ath_hints', hints);
+            updateRank();
+        }
+
+        function updateRank() {
+            let rank = "طالب علم";
+            if(pts > 3000) rank = "عالم";
+            else if(pts > 1500) rank = "متفقه";
+            else if(pts > 500) rank = "باحث";
+            document.getElementById('rank-tag').innerText = "اللقب: " + rank;
+        }
         sync();
 
         function showCard(id) {
@@ -226,32 +306,17 @@
 
         function startGame(lvl) {
             pool = [...DB[lvl]].sort(() => Math.random() - 0.5);
-            scores = {1:0, 2:0}; turn = 1;
             document.getElementById('game-info').innerText = "الطور: " + gameMode;
-            
-            if(gameMode === 'group') {
-                document.getElementById('group-header').style.display = 'block';
-                document.getElementById('t-cont').style.display = 'none';
-                updateGroupUI();
-            } else {
-                document.getElementById('group-header').style.display = 'none';
-                document.getElementById('t-cont').style.display = 'block';
-                if(gameMode === 'speed') startTimer();
-            }
-            
+            document.getElementById('hint-btn').style.display = (gameMode !== 'group' && hints > 0) ? 'inline-block' : 'none';
+            document.getElementById('t-cont').style.display = (gameMode === 'group') ? 'none' : 'block';
+            if(gameMode === 'speed') startTimer();
             showCard('scr-game');
             next();
         }
 
-        function updateGroupUI() {
-            document.getElementById('p1-score').innerText = scores[1];
-            document.getElementById('p2-score').innerText = scores[2];
-            document.getElementById('p1-label').className = (turn === 1) ? 'active-player' : '';
-            document.getElementById('p2-label').className = (turn === 2) ? 'active-player' : '';
-        }
-
         function startTimer() {
             let t = 30;
+            if(timer) clearInterval(timer);
             timer = setInterval(() => {
                 t--;
                 document.getElementById('timer-bar').style.width = (t/30)*100 + "%";
@@ -263,6 +328,7 @@
             if(pool.length === 0) { endGame(); return; }
             active = true;
             let qD = pool.pop();
+            currentAnswer = qD.a;
             let ops = [qD.a, ...qD.w].sort(() => Math.random() - 0.5);
             document.getElementById('q-txt').innerText = qD.q;
             const box = document.getElementById('opt-container');
@@ -272,34 +338,44 @@
                 b.onclick = () => {
                     if(!active) return; active = false;
                     if(opt === qD.a) {
-                        b.classList.add('correct'); 
-                        if(gameMode === 'group') scores[turn] += 10;
-                        pts += 10; sync();
-                        setTimeout(() => { if(gameMode === 'group') { turn = (turn === 1) ? 2 : 1; updateGroupUI(); } next(); }, 700);
+                        b.classList.add('correct'); pts += 10; sync();
+                        setTimeout(next, 700);
                     } else {
                         b.classList.add('wrong');
-                        if(gameMode === 'survival') setTimeout(() => { alert("خسرت في طور البقاء!"); endGame(); }, 400);
-                        else setTimeout(() => { if(gameMode === 'group') { turn = (turn === 1) ? 2 : 1; updateGroupUI(); } next(); }, 700);
+                        if(gameMode === 'survival') setTimeout(endGame, 400);
+                        else setTimeout(next, 700);
                     }
                 };
                 box.appendChild(b);
             });
         }
 
+        function useHint() {
+            if(hints > 0) {
+                const btns = document.querySelectorAll('#opt-container .btn');
+                for(let b of btns) {
+                    if(b.innerText !== currentAnswer && !b.disabled) {
+                        b.style.opacity = "0.3"; b.disabled = true;
+                        hints--; sync();
+                        document.getElementById('hint-btn').style.display = (hints > 0) ? 'inline-block' : 'none';
+                        break;
+                    }
+                }
+            }
+        }
+
         function endGame() {
-            clearInterval(timer);
-            if(gameMode === 'group') alert(`انتهى التحدي!\nلاعب 1: ${scores[1]}\nلاعب 2: ${scores[2]}`);
-            else alert("انتهت الجولة!");
+            if(timer) clearInterval(timer);
             showCard('scr-home');
         }
 
-        function buy(i, c) { if(pts >= c) { pts -= c; sync(); if(i==='dark') document.body.classList.toggle('dark-mode'); alert('تم!'); } else alert('نقاطك لا تكفي'); }
-
+        function buy(i, c) { 
+            if(pts >= c) { 
+                pts -= c; if(i==='dark') document.body.classList.toggle('dark-mode'); 
+                if(i==='hint') hints += 5;
+                sync(); alert('تم الشراء!'); 
+            } else alert('نقاطك لا تكفي'); 
+        }
     </script>
-<footer class="footer">
-    <div class="container">
-        <p>&copy; 2026 <strong>محمد خير أبو بلال</strong>. جميع الحقوق محفوظة.</p>
-    </div>
-</footer>
 </body>
 </html>
